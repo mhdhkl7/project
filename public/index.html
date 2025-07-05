@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Video Hosting</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #ffffff; color: #111; }
+        .container { text-align: center; }
+        h1 { font-size: 2.5rem; }
+        p { color: #555; }
+        .upload-btn { background-color: #000; color: #fff; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .upload-btn:hover { transform: scale(1.05); }
+        #videoFile { display: none; }
+        #result { margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; word-break: break-all; }
+        #result a { color: #007bff; text-decoration: none; }
+        #loading { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Free and Simple Video Hosting</h1>
+        <p>Get started without an account</p>
+
+        <form id="uploadForm">
+            <input type="file" name="videoFile" id="videoFile" accept="video/*">
+            <button type="button" class="upload-btn" onclick="document.getElementById('videoFile').click();">Upload a Video</button>
+        </form>
+
+        <div id="loading" style="display: none;">Mengunggah video... mohon tunggu.</div>
+        <div id="result" style="display: none;"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
