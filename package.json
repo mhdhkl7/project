@@ -12,7 +12,8 @@
   "dependencies": {
     "cloudinary": "^2.7.0",
     "express": "^5.1.0",
-    "multer": "^2.0.1"
+    "multer": "^2.0.1",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "dotenv": "^17.0.1"
