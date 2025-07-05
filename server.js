@@ -17,9 +17,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, // Ambil dari CLOUDINARY_URL
-    api_key: process.env.CLOUDINARY_API_KEY,       // Ambil dari CLOUDINARY_URL
-    api_secret: process.env.CLOUDINARY_API_SECRET // Ambil dari CLOUDINARY_URL
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 // 3. Konfigurasi Multer untuk menyimpan file di memori (bukan di disk!)
@@ -27,9 +27,10 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // 4. Middleware untuk menyajikan file statis dari folder 'public'
-app.use(express.static('public'));
+// ## BARIS INI YANG DIPERBAIKI: Menggunakan path absolut agar pasti ditemukan di Vercel ##
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 5. "Database" di memori (PENTING: Baca catatan di bawah)
+// 5. "Database" di memori
 const videoDatabase = {};
 
 // 6. Fungsi untuk mengunggah stream ke Cloudinary
@@ -88,9 +89,8 @@ app.get('/video/:id', (req, res) => {
     if (!videoInfo) {
         return res.status(404).send('<h1>Video tidak ditemukan!</h1><p>Link mungkin salah atau video telah dihapus.</p>');
     }
-
+    
     // Alihkan pengguna langsung ke URL video di Cloudinary
-    // Ini jauh lebih efisien!
     res.redirect(videoInfo.url);
 });
 
