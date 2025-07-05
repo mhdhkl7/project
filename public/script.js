@@ -1,59 +1,63 @@
-// script.js
+// public/script.js
 
-// Ambil elemen-elemen HTML yang kita butuhkan
 const videoFileInput = document.getElementById('videoFile');
-const uploadForm = document.getElementById('uploadForm');
 const resultDiv = document.getElementById('result');
 const loadingDiv = document.getElementById('loading');
+const uploadBtn = document.querySelector('.upload-btn');
 
-// Tambahkan 'event listener' saat pengguna memilih file
+// GANTI DENGAN NAMA CLOUD-MU DARI CLOUDINARY
+const CLOUD_NAME = 'djggsvjzm';
+const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
+
 videoFileInput.addEventListener('change', () => {
-    // Ambil file yang dipilih
     const file = videoFileInput.files[0];
     if (file) {
-        // Jika ada file, langsung mulai proses upload
         uploadFile(file);
     }
 });
 
-// Fungsi untuk meng-handle upload file ke server
 async function uploadFile(file) {
-    // Tampilkan pesan loading dan sembunyikan hasil sebelumnya
     loadingDiv.style.display = 'block';
     resultDiv.style.display = 'none';
-
-    // Buat objek FormData untuk mengirim file
-    const formData = new FormData();
-    formData.append('videoFile', file); // 'videoFile' harus sama dengan yang di-handle Multer di backend
+    uploadBtn.disabled = true;
 
     try {
-        // Kirim request POST ke endpoint /upload di server kita
-        const response = await fetch('/upload', {
+        // 1. Dapatkan signature dari backend kita
+        const signatureResponse = await fetch('/api/get-upload-signature');
+        const signatureData = await signatureResponse.json();
+
+        // 2. Siapkan data untuk diunggah ke Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('api_key', signatureData.api_key);
+        formData.append('timestamp', signatureData.timestamp);
+        formData.append('signature', signatureData.signature);
+
+        // 3. Unggah file LANGSUNG ke Cloudinary
+        const cloudinaryResponse = await fetch(UPLOAD_URL, {
             method: 'POST',
             body: formData,
         });
 
-        // Ubah respons dari server menjadi format JSON
-        const data = await response.json();
+        const cloudinaryData = await cloudinaryResponse.json();
 
-        // Sembunyikan pesan loading
-        loadingDiv.style.display = 'none';
-
-        if (data.success) {
-            // Jika upload berhasil, tampilkan link-nya
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `Video berhasil diunggah! Bagikan link ini: <br> <a href="${data.link}" target="_blank">${data.link}</a>`;
-        } else {
-            // Jika gagal, tampilkan pesan error
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `Gagal mengunggah: ${data.message}`;
+        if (cloudinaryData.error) {
+            throw new Error(cloudinaryData.error.message);
         }
 
-    } catch (error) {
-        // Tangani jika ada error jaringan atau server
-        loadingDiv.style.display = 'none';
+        // 4. Tampilkan link yang berhasil
+        const shareableLink = cloudinaryData.secure_url;
         resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `Terjadi kesalahan. Silakan coba lagi.`;
+        resultDiv.innerHTML = `Video berhasil diunggah! Bagikan link ini: <br> <a href="${shareableLink}" target="_blank">${shareableLink}</a>`;
+
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `Gagal mengunggah: ${error.message}`;
         console.error('Error:', error);
+    } finally {
+        // Apapun yang terjadi, kembalikan UI ke keadaan normal
+        loadingDiv.style.display = 'none';
+        uploadBtn.disabled = false;
+        videoFileInput.value = ''; // Reset input file
     }
 }
