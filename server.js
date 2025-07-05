@@ -1,7 +1,10 @@
 // server.js
 
 // 1. Impor library
-require('dotenv').config(); // Muat variabel dari .env di awal
+// Hanya jalankan dotenv jika kita TIDAK di lingkungan 'production'
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
